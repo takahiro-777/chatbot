@@ -36,6 +36,14 @@ $ sudo python setup.py install
 $ pip install slackbot
 ```
 
+## botの実行
+```
+$ cp slackbot_settings_sample.py slackbot_setting.py
+->slackbot_setting.pyのAPI_TOKENを変更する。
+->slackbot_setting.pyのPLUGINSで使用するアルゴリズムのディレクトリを指定する。
+$ python run.py
+```
+
 # 参考資料
 ```
 http://qiita.com/taroc/items/b9afd914432da08dafc8
