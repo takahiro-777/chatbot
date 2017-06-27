@@ -26,6 +26,13 @@ def listen_func(message):
 def listen_func(message):
     message.send('沈黙')      # ただの投稿
 
+@listen_to('おお')
+@listen_to('なるほど')
+@listen_to('すごい')
+@listen_to('素晴らしい')
+def listen_func(message):
+    message.send('どうだ、すごいだろ')      # ただの投稿
+
 @listen_to('mecab sample')
 def listen_func(message):
     m = MeCab.Tagger ("-Ochasen")
