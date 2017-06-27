@@ -8,4 +8,5 @@ DEFAULT_REPLY = "何言ってんだこいつ"
 
 # プラグインスクリプトを置いてあるサブディレクトリ名のリスト
 PLUGINS = ['plugins_default']
-#PLUGINS = ['plugins_experiment']
+#PLUGINS = ['plugins_word2tag']
+#PLUGINS = ['plugins_word2intent']
