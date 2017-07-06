@@ -4,38 +4,57 @@
 import numpy as np
 from janome.tokenizer import Tokenizer
 import yaml
-from flask import Flask
+import ast
+from flask import Flask, jsonify
 from flask import request
 
 #極性データの読み込み
-f = open("plugins_default/polarity.yml", "r+")
-polarity = yaml.load(f)
+f = open("plugins_word2intent/word2intent.yml", "r+")
+correspondence = yaml.load(f)
 
-def polarity_analysis(text):
+def word2intent(text):
     t = Tokenizer()
     #m = MeCab.Tagger ("-d /usr/local/lib/mecab/dic/mecab-ipadic-neologd")
     tokens = t.tokenize(text)
     #msg = 'あなたの送ったメッセージをmecabで解析します。\n```' + m.parse(text) + '```'
-    pol_val = 0
+    intentions = []
     for token in tokens:
         word = token.surface
         #品詞を取得
         pos = token.part_of_speech.split(',')[0]
-        if word in polarity:
-            pol_val = pol_val + float(polarity[word])
+        if word in correspondence:
+            intentions.append(correspondence[word])
 
-    return pol_val
+    return intentions
 
 app = Flask(__name__)
+app.config['JSON_AS_ASCII'] = False
 
-@app.route('/hello')
-def hello():
+@app.route('/test')
+def test():
     # request.argsにクエリパラメータが含まれている
     text = request.args.get("msg", "Not defined")
     #res = "your input text is "+val
-    pol_val = polarity_analysis(text)
-    res = "your input text is "+text+". Polarity is "+str(pol_val)
-    return res
+    intentions = word2intent(text)
+    #res = "your input text is "+text+". Your intention is "+','.join(intentions)
+    res = {}
+    res['text'] = text
+    res['intentions'] = ','.join(intentions)
+    res_json = jsonify(res)
+    return res_json
+
+@app.route('/post_req', methods=['POST'])
+def post_req():
+    # request.argsにクエリパラメータが含まれている
+    data = ast.literal_eval(request.data.decode())
+    text = data["msg"]
+    intentions = word2intent(text)
+    #res = "your input text is "+text+". Your intention is "+','.join(intentions)
+    res = {}
+    res['text'] = text
+    res['intentions'] = ','.join(intentions)
+    res_json = jsonify(res)
+    return res_json
 
 if __name__ == "__main__":
     print('start bot_API')
