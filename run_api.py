@@ -4,7 +4,7 @@
 import numpy as np
 from janome.tokenizer import Tokenizer
 import yaml
-from flask import Flask
+from flask import Flask, jsonify
 from flask import request
 
 #極性データの読み込み
@@ -27,15 +27,20 @@ def word2intent(text):
     return intentions
 
 app = Flask(__name__)
+app.config['JSON_AS_ASCII'] = False
 
-@app.route('/hello')
-def hello():
+@app.route('/test')
+def test():
     # request.argsにクエリパラメータが含まれている
     text = request.args.get("msg", "Not defined")
     #res = "your input text is "+val
     intentions = word2intent(text)
-    res = "your input text is "+text+". Your intention is "+','.join(intentions)
-    return res
+    #res = "your input text is "+text+". Your intention is "+','.join(intentions)
+    res = {}
+    res['text'] = text
+    res['intentions'] = ','.join(intentions)
+    res_json = jsonify(res)
+    return res_json
 
 if __name__ == "__main__":
     print('start bot_API')
