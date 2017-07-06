@@ -8,23 +8,23 @@ from flask import Flask
 from flask import request
 
 #極性データの読み込み
-f = open("plugins_default/polarity.yml", "r+")
-polarity = yaml.load(f)
+f = open("plugins_word2intent/word2intent.yml", "r+")
+correspondence = yaml.load(f)
 
-def polarity_analysis(text):
+def word2intent(text):
     t = Tokenizer()
     #m = MeCab.Tagger ("-d /usr/local/lib/mecab/dic/mecab-ipadic-neologd")
     tokens = t.tokenize(text)
     #msg = 'あなたの送ったメッセージをmecabで解析します。\n```' + m.parse(text) + '```'
-    pol_val = 0
+    intentions = []
     for token in tokens:
         word = token.surface
         #品詞を取得
         pos = token.part_of_speech.split(',')[0]
-        if word in polarity:
-            pol_val = pol_val + float(polarity[word])
+        if word in correspondence:
+            intentions.append(correspondence[word])
 
-    return pol_val
+    return intentions
 
 app = Flask(__name__)
 
@@ -33,8 +33,8 @@ def hello():
     # request.argsにクエリパラメータが含まれている
     text = request.args.get("msg", "Not defined")
     #res = "your input text is "+val
-    pol_val = polarity_analysis(text)
-    res = "your input text is "+text+". Polarity is "+str(pol_val)
+    intentions = word2intent(text)
+    res = "your input text is "+text+". Your intention is "+','.join(intentions)
     return res
 
 if __name__ == "__main__":
