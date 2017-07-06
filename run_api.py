@@ -4,6 +4,7 @@
 import numpy as np
 from janome.tokenizer import Tokenizer
 import yaml
+import ast
 from flask import Flask, jsonify
 from flask import request
 
@@ -34,6 +35,19 @@ def test():
     # request.argsにクエリパラメータが含まれている
     text = request.args.get("msg", "Not defined")
     #res = "your input text is "+val
+    intentions = word2intent(text)
+    #res = "your input text is "+text+". Your intention is "+','.join(intentions)
+    res = {}
+    res['text'] = text
+    res['intentions'] = ','.join(intentions)
+    res_json = jsonify(res)
+    return res_json
+
+@app.route('/post_req', methods=['POST'])
+def post_req():
+    # request.argsにクエリパラメータが含まれている
+    data = ast.literal_eval(request.data.decode())
+    text = data["msg"]
     intentions = word2intent(text)
     #res = "your input text is "+text+". Your intention is "+','.join(intentions)
     res = {}
