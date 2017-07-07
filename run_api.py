@@ -17,6 +17,8 @@ f = open("api_config/word2intent.yml", "r+")
 correspondence = yaml.load(f)
 f = open("api_config/date_info.yml", "r+")
 date_info = yaml.load(f)
+f = open("api_config/gourmet_genre.yml", "r+")
+gourmet_genre = yaml.load(f)
 
 
 def word2intent(tokens):
@@ -40,6 +42,17 @@ def get_date(tokens):
             date = today + datetime.timedelta(days=date_info[word])
             break
     return date.isoformat()
+
+def get_genre(tokens):
+    genre = []
+    for token in tokens:
+        word = token.surface
+        #品詞を取得
+        pos = token.part_of_speech.split(',')[0]
+        if word in gourmet_genre:
+            genre.append(gourmet_genre[word])
+
+    return genre
 
 @app.route('/test')
 def test():
@@ -68,6 +81,9 @@ def post_req():
     res['text'] = text
     res['intentions'] = ','.join(intentions)
     res['date'] = date
+    if 'グルメ' in intentions:
+        genre = get_genre(tokens)
+        res['genre'] = ','.join(genre)
     res_json = jsonify(res)
 
     return res_json
