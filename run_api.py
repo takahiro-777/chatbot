@@ -3,14 +3,21 @@
 # requestを追加する
 import numpy as np
 from janome.tokenizer import Tokenizer
+import datetime
 import yaml
 import ast
 from flask import Flask, jsonify
 from flask import request
 
-#極性データの読み込み
-f = open("plugins_word2intent/word2intent.yml", "r+")
+app = Flask(__name__)
+app.config['JSON_AS_ASCII'] = False
+
+#ルールの読み込み
+f = open("api_config/word2intent.yml", "r+")
 correspondence = yaml.load(f)
+f = open("api_config/date_info.yml", "r+")
+date_info = yaml.load(f)
+
 
 def word2intent(text):
     t = Tokenizer()
@@ -27,8 +34,18 @@ def word2intent(text):
 
     return intentions
 
-app = Flask(__name__)
-app.config['JSON_AS_ASCII'] = False
+def get_date(text):
+    today = datetime.date.today()
+    date = today
+    t = Tokenizer()
+    tokens = t.tokenize(text)
+    for token in tokens:
+        word = token.surface
+        pos = token.part_of_speech.split(',')[0]
+        if word in date_info:
+            date = today + datetime.timedelta(days=date_info[word])
+            break
+    return date.isoformat()
 
 @app.route('/test')
 def test():
@@ -45,15 +62,18 @@ def test():
 
 @app.route('/post_req', methods=['POST'])
 def post_req():
-    # request.argsにクエリパラメータが含まれている
     data = ast.literal_eval(request.data.decode())
     text = data["msg"]
     intentions = word2intent(text)
-    #res = "your input text is "+text+". Your intention is "+','.join(intentions)
+    date = get_date(text)
+
+    #返り値となるJSONの設定
     res = {}
     res['text'] = text
     res['intentions'] = ','.join(intentions)
+    res['date'] = date
     res_json = jsonify(res)
+
     return res_json
 
 if __name__ == "__main__":
