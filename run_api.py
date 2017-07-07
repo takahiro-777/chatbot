@@ -19,11 +19,7 @@ f = open("api_config/date_info.yml", "r+")
 date_info = yaml.load(f)
 
 
-def word2intent(text):
-    t = Tokenizer()
-    #m = MeCab.Tagger ("-d /usr/local/lib/mecab/dic/mecab-ipadic-neologd")
-    tokens = t.tokenize(text)
-    #msg = 'あなたの送ったメッセージをmecabで解析します。\n```' + m.parse(text) + '```'
+def word2intent(tokens):
     intentions = []
     for token in tokens:
         word = token.surface
@@ -34,11 +30,9 @@ def word2intent(text):
 
     return intentions
 
-def get_date(text):
+def get_date(tokens):
     today = datetime.date.today()
     date = today
-    t = Tokenizer()
-    tokens = t.tokenize(text)
     for token in tokens:
         word = token.surface
         pos = token.part_of_speech.split(',')[0]
@@ -64,8 +58,10 @@ def test():
 def post_req():
     data = ast.literal_eval(request.data.decode())
     text = data["msg"]
-    intentions = word2intent(text)
-    date = get_date(text)
+    t = Tokenizer()
+    tokens = t.tokenize(text)
+    intentions = word2intent(tokens)
+    date = get_date(tokens)
 
     #返り値となるJSONの設定
     res = {}
